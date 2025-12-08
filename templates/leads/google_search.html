@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Google Maps Search - Rikyu Matcha Sales Flow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-6">
+            <i class="bi bi-geo-alt text-success"></i> Google Maps Search
+        </h1>
+        <p class="text-muted">Search for cafés using the official Google Places API.</p>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-9">
+                            {{ form.query }}
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" name="search" class="btn btn-success w-100">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results -->
+{% if results %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-check"></i> Search Results ({{ results|length }})
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th width="50">Select</th>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>City</th>
+                                    <th>Instagram</th>
+                                    <th>Website</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox" name="selected_cafes" value="{{ forloop.counter0 }}" class="form-check-input">
+                                    </td>
+                                    <td>
+                                        <strong>{{ result.name }}</strong>
+                                        {% if result.instagram_handle %}
+                                            <br><small class="text-success"><i class="bi bi-check-circle"></i> Instagram found</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ result.address|truncatewords:8 }}</td>
+                                    <td>{{ result.city|default:"-" }}</td>
+                                    <td>
+                                        {% if result.instagram_handle %}
+                                            <a href="{{ result.instagram_url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-instagram"></i> @{{ result.instagram_handle }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted small">Not found</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if result.website %}
+                                            <a href="{{ result.website }}" target="_blank" class="text-decoration-none">
+                                                <i class="bi bi-link-45deg"></i> Link
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <button type="submit" name="save_selected" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Selected Cafés
+                        </button>
+                        <small class="text-muted ms-3">Select the cafés you want to add to your database.</small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+</div>
+{% endif %}
+
+{% if not results and not error %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Enter a search query above to find cafés using Google Maps.
+            <br><small>Example: "matcha café in Tokyo" or "coffee shop in Shibuya"</small>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+
+
+

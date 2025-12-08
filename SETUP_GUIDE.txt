@@ -1,0 +1,83 @@
+================================================================
+QUICK SETUP GUIDE - Sales Leads Application
+================================================================
+
+Follow these steps to get the application running:
+
+1. CREATE VIRTUAL ENVIRONMENT
+   -------------------------
+   python3.12 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+2. INSTALL DEPENDENCIES
+   --------------------
+   pip install -r requirements.txt
+
+3. SETUP ENVIRONMENT VARIABLES
+   ---------------------------
+   Copy env.example to .env:
+   cp env.example .env
+   
+   Edit .env and add your API credentials:
+   - SECRET_KEY (generate one for production)
+   - GOOGLE_MAPS_API_KEY
+   - APIFY_TOKEN
+   - APIFY_ACTOR_TIKTOK
+   - APIFY_ACTOR_INSTAGRAM
+
+4. RUN DATABASE MIGRATIONS
+   -----------------------
+   python manage.py makemigrations
+   python manage.py migrate
+
+5. CREATE ADMIN USER
+   -----------------
+   python manage.py createsuperuser
+
+6. START THE SERVER
+   ----------------
+   python manage.py runserver
+
+7. ACCESS THE APPLICATION
+   ----------------------
+   Main app: http://localhost:8000/
+   Admin panel: http://localhost:8000/admin/
+
+================================================================
+IMPORTANT NOTES
+================================================================
+
+API Keys Required:
+- Google Maps API: Get from Google Cloud Console
+  Enable: Places API, Places Details API
+  
+- Apify: Sign up at apify.com
+  Get your API token from account settings
+  Configure actor IDs for TikTok and Instagram scrapers
+
+Default Database:
+- SQLite (db.sqlite3) - suitable for development
+- For production, consider PostgreSQL (see settings.py)
+
+Compliance:
+- Google Maps data: Official API usage
+- TikTok/Instagram: Respect platform Terms of Service
+- NO automated DM/messaging functionality
+- Internal R&D use only
+
+================================================================
+TESTING THE APP
+================================================================
+
+1. Sign up for an account at /accounts/signup/
+2. Login at /accounts/login/
+3. Try Google Maps search: "matcha café in Tokyo"
+4. Try Apify search (if configured): "matcha café" on TikTok
+5. Browse collected cafés at /cafes/
+6. Edit café details to add notes
+
+================================================================
+
+
+
+

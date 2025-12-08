@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit {{ cafe.name }} - Rikyu Matcha Sales Flow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cafe_list' %}">All Cafés</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cafe_detail' cafe.pk %}">{{ cafe.name }}</a></li>
+                <li class="breadcrumb-item active">Edit</li>
+            </ol>
+        </nav>
+        
+        <h1 class="display-6">
+            <i class="bi bi-pencil"></i> Edit Café
+        </h1>
+        <p class="text-muted">Update information for {{ cafe.name }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Name *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.city.id_for_label }}" class="form-label">City</label>
+                            {{ form.city }}
+                            {% if form.city.errors %}
+                                <div class="text-danger">{{ form.city.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.website.id_for_label }}" class="form-label">Website</label>
+                            {{ form.website }}
+                            {% if form.website.errors %}
+                                <div class="text-danger">{{ form.website.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <div class="text-danger">{{ form.address.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3">
+                        <i class="bi bi-share"></i> Social Media
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.instagram_handle.id_for_label }}" class="form-label">
+                                <i class="bi bi-instagram text-danger"></i> Instagram Handle
+                            </label>
+                            {{ form.instagram_handle }}
+                            {% if form.instagram_handle.errors %}
+                                <div class="text-danger">{{ form.instagram_handle.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.tiktok_handle.id_for_label }}" class="form-label">
+                                <i class="bi bi-tiktok"></i> TikTok Handle
+                            </label>
+                            {{ form.tiktok_handle }}
+                            {% if form.tiktok_handle.errors %}
+                                <div class="text-danger">{{ form.tiktok_handle.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            <i class="bi bi-sticky"></i> Notes
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                            <div class="text-danger">{{ form.notes.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                        <a href="{% url 'cafe_detail' cafe.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Help
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Social Media Handles:</strong></p>
+                <p class="text-muted small">Enter only the username without the @ symbol.</p>
+                
+                <p class="mb-2 mt-3"><strong>Notes:</strong></p>
+                <p class="text-muted small">Add any additional information, contact details, or observations about this café.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+

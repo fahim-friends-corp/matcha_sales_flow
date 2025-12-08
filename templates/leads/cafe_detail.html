@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ cafe.name }} - Rikyu Matcha Sales Flow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cafe_list' %}">All Cafés</a></li>
+                <li class="breadcrumb-item active">{{ cafe.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="display-6">
+                <i class="bi bi-cup-hot"></i> {{ cafe.name }}
+            </h1>
+            <a href="{% url 'cafe_update' cafe.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Basic Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <th width="200">Name:</th>
+                            <td>{{ cafe.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>City:</th>
+                            <td>{{ cafe.city|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Address:</th>
+                            <td>{{ cafe.address|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Website:</th>
+                            <td>
+                                {% if cafe.website %}
+                                    <a href="{{ cafe.website }}" target="_blank" class="text-decoration-none">
+                                        {{ cafe.website }} <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-share"></i> Social Media
+                </h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <th width="200">
+                                <i class="bi bi-instagram text-danger"></i> Instagram:
+                            </th>
+                            <td>
+                                {% if cafe.instagram_handle %}
+                                    <a href="https://instagram.com/{{ cafe.instagram_handle }}" target="_blank" class="text-decoration-none">
+                                        @{{ cafe.instagram_handle }} <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="bi bi-tiktok"></i> TikTok:
+                            </th>
+                            <td>
+                                {% if cafe.tiktok_handle %}
+                                    <a href="https://tiktok.com/@{{ cafe.tiktok_handle }}" target="_blank" class="text-decoration-none">
+                                        @{{ cafe.tiktok_handle }} <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if cafe.notes %}
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-sticky"></i> Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">{{ cafe.notes|linebreaks }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-gear"></i> Metadata
+                </h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless table-sm">
+                    <tbody>
+                        <tr>
+                            <th>Source:</th>
+                            <td>
+                                <span class="badge bg-secondary">{{ cafe.get_source_display }}</span>
+                            </td>
+                        </tr>
+                        {% if cafe.google_place_id %}
+                        <tr>
+                            <th>Place ID:</th>
+                            <td>
+                                <small class="text-muted font-monospace">{{ cafe.google_place_id }}</small>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Added:</th>
+                            <td>{{ cafe.created_at|date:"F d, Y g:i A" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-tools"></i> Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'cafe_update' cafe.pk %}" class="btn btn-primary w-100 mb-2">
+                    <i class="bi bi-pencil"></i> Edit Information
+                </a>
+                <a href="{% url 'cafe_list' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+

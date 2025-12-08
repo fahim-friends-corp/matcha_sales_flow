@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}All Cafés - Rikyu Matcha Sales Flow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-6">
+            <i class="bi bi-list-ul"></i> All Cafés
+        </h1>
+        <p class="text-muted">Browse and manage all collected café leads.</p>
+    </div>
+</div>
+
+<!-- Filters and Export -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-9">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Source</label>
+                                {{ filter_form.source }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">City</label>
+                                {{ filter_form.city }}
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-funnel"></i> Apply Filters
+                                </button>
+                                <a href="{% url 'cafe_list' %}" class="btn btn-outline-secondary ms-2">
+                                    <i class="bi bi-x-circle"></i> Clear
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end justify-content-end">
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" name="export_to_sheets" class="btn btn-success w-100" {% if not spreadsheet_id %}disabled title="Configure spreadsheet ID in .env"{% endif %}>
+                                <i class="bi bi-file-earmark-spreadsheet"></i> Export to Google Sheets
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% if spreadsheet_url %}
+                <div class="mt-3">
+                    <div class="alert alert-success mb-0">
+                        <i class="bi bi-check-circle"></i> 
+                        Your Google Sheet: <a href="{{ spreadsheet_url }}" target="_blank" class="alert-link fw-bold">Open Master Spreadsheet</a>
+                    </div>
+                </div>
+                {% elif not spreadsheet_id %}
+                <div class="mt-3">
+                    <div class="alert alert-warning mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        <strong>Setup Required:</strong> Add your Google Sheets ID to <code>.env</code> file. 
+                        <a href="#" class="alert-link" onclick="alert('1. Create a Google Sheet\n2. Copy ID from URL\n3. Add to .env as GOOGLE_SHEETS_SPREADSHEET_ID\n4. Share sheet with service account\n\nSee GOOGLE_SHEETS_SETUP.md for details'); return false;">Quick Guide</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Café List -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    Cafés ({{ total_cafes }} total{% if page_obj.paginator.num_pages > 1 %}, {{ page_obj.paginator.num_pages }} pages{% endif %})
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>City</th>
+                                <th>Source</th>
+                                <th>Website</th>
+                                <th>Instagram</th>
+                                <th>TikTok</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cafe in page_obj %}
+                            <tr>
+                                <td><strong>{{ cafe.name }}</strong></td>
+                                <td>{{ cafe.city|default:"-" }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ cafe.get_source_display }}</span>
+                                </td>
+                                <td>
+                                    {% if cafe.website %}
+                                        <a href="{{ cafe.website }}" target="_blank" class="text-decoration-none">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if cafe.instagram_handle %}
+                                        <a href="https://instagram.com/{{ cafe.instagram_handle }}" target="_blank" class="text-decoration-none">
+                                            <i class="bi bi-instagram text-danger"></i> @{{ cafe.instagram_handle }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if cafe.tiktok_handle %}
+                                        <a href="https://tiktok.com/@{{ cafe.tiktok_handle }}" target="_blank" class="text-decoration-none">
+                                            <i class="bi bi-tiktok"></i> @{{ cafe.tiktok_handle }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ cafe.created_at|date:"M d, Y" }}</td>
+                                <td class="table-actions">
+                                    <a href="{% url 'cafe_detail' cafe.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="card-footer bg-white">
+                    <nav>
+                        <ul class="pagination mb-0 justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.source %}&source={{ request.GET.source }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.source %}&source={{ request.GET.source }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.source %}&source={{ request.GET.source }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.source %}&source={{ request.GET.source }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">Last</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <p class="text-muted text-center py-4">No cafés found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
