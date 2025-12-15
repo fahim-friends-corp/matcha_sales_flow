@@ -67,3 +67,4 @@ class SearchQuery(models.Model):
 
 
 
+

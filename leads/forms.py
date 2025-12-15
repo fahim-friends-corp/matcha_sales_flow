@@ -48,7 +48,8 @@ class ApifySearchForm(forms.Form):
         choices=PLATFORM_CHOICES,
         required=True,
         widget=forms.Select(attrs={
-            'class': 'form-select'
+            'class': 'form-select',
+            'id': 'platform-select'
         }),
         label='Platform'
     )

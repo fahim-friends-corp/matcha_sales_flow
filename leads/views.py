@@ -124,14 +124,18 @@ def google_search_view(request):
     
     if request.method == 'POST':
         if 'search' in request.POST:
+            print("DEBUG: Google search initiated")
             # Handle search form submission
             form = GoogleMapsSearchForm(request.POST)
             if form.is_valid():
                 query = form.cleaned_data['query']
+                print(f"DEBUG: Search query: {query}")
                 
                 try:
                     # Search using Google Maps API
+                    print("DEBUG: Calling search_places...")
                     results = search_places(query)
+                    print(f"DEBUG: Found {len(results)} results")
                     
                     # Enhance results with website information and Instagram
                     for result in results:
@@ -222,7 +226,13 @@ def google_search_view(request):
                 
                 except Exception as e:
                     error = str(e)
+                    print(f"DEBUG: Search error: {error}")
+                    import traceback
+                    traceback.print_exc()
                     messages.error(request, f'Search failed: {error}')
+            else:
+                print(f"DEBUG: Form validation failed: {form.errors}")
+                messages.error(request, 'Please enter a valid search query.')
     
     # If we have results in session, display them
     if not results and 'google_search_results' in request.session:

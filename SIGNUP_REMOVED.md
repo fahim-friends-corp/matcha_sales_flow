@@ -160,3 +160,4 @@ curl http://localhost:8000/accounts/signup/
 | **Login Page** | "Sign up here" link | "Contact administrator" message |
 
 **Signup functionality has been completely disabled. All user accounts must be created via Django admin panel.** 🔒✅
+

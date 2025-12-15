@@ -46,3 +46,4 @@ class SearchQueryAdmin(admin.ModelAdmin):
 
 
 
+

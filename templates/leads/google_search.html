@@ -2,7 +2,53 @@
 
 {% block title %}Google Maps Search - Rikyu Matcha Sales Flow{% endblock %}
 
+{% block extra_css %}
+<style>
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+    .loading-content {
+        background: white;
+        padding: 30px 50px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #198754;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <h4><i class="bi bi-search"></i> Searching Google Maps...</h4>
+        <p class="text-muted mb-0">Finding cafés and extracting Instagram handles</p>
+    </div>
+</div>
+
 <div class="row mb-4">
     <div class="col">
         <h1 class="display-6">
@@ -17,14 +63,14 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-body">
-                <form method="post">
+                <form method="post" id="searchForm">
                     {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-9">
                             {{ form.query }}
                         </div>
                         <div class="col-md-3">
-                            <button type="submit" name="search" class="btn btn-success w-100">
+                            <button type="submit" name="search" id="searchBtn" class="btn btn-success w-100">
                                 <i class="bi bi-search"></i> Search
                             </button>
                         </div>
@@ -126,6 +172,30 @@
     </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    const searchBtn = document.getElementById('searchBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            // Only show loading for search button, not save button
+            if (e.submitter && e.submitter.name === 'search') {
+                // Show loading overlay
+                loadingOverlay.style.display = 'flex';
+                
+                // Disable search button
+                searchBtn.disabled = true;
+                searchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Searching...';
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
 
 

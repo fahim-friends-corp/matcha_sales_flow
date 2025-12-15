@@ -1,8 +1,71 @@
 {% extends 'base.html' %}
 
+{% load custom_filters %}
+
 {% block title %}Social Media Search - Rikyu Matcha Sales Flow{% endblock %}
 
+{% block extra_css %}
+<style>
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+    .loading-content {
+        background: white;
+        padding: 30px 50px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #0d6efd;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .loading-steps {
+        text-align: left;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+    .loading-steps li {
+        margin-bottom: 8px;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <h4 id="loadingTitle"><i class="bi bi-search"></i> Searching <span id="platformName"></span>...</h4>
+        <p class="text-muted mb-2">This may take 10-30 seconds</p>
+        <ul class="loading-steps">
+            <li><i class="bi bi-clock-history"></i> Running Apify actor...</li>
+            <li><i class="bi bi-database"></i> Collecting results...</li>
+            <li><i class="bi bi-instagram text-danger"></i> Extracting Instagram handles...</li>
+            <li><i class="bi bi-cloud-download"></i> Auto-saving with Instagram...</li>
+        </ul>
+    </div>
+</div>
+
 <div class="row mb-4">
     <div class="col">
         <h1 class="display-6">
@@ -24,7 +87,7 @@
     <div class="col-md-10">
         <div class="card">
             <div class="card-body">
-                <form method="post">
+                <form method="post" id="searchForm">
                     {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-3">
@@ -41,7 +104,7 @@
                             <small class="form-text text-muted" id="query-help">{{ form.query.help_text }}</small>
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" name="search" class="btn btn-primary w-100">
+                            <button type="submit" name="search" id="searchBtn" class="btn btn-primary w-100">
                                 <i class="bi bi-search"></i> Search
                             </button>
                         </div>
@@ -51,33 +114,6 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Dynamic placeholder and help text based on search type
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchTypeSelect = document.getElementById('search-type-select');
-        const queryInput = document.getElementById('query-input');
-        const queryHelp = document.getElementById('query-help');
-        
-        if (searchTypeSelect && queryInput) {
-            searchTypeSelect.addEventListener('change', function() {
-                const searchType = this.value;
-                
-                if (searchType === 'profile') {
-                    queryInput.placeholder = 'e.g., starbucks bluebottlecoffee';
-                    queryHelp.textContent = 'Enter usernames (without @), separated by spaces';
-                } else if (searchType === 'hashtag') {
-                    queryInput.placeholder = 'e.g., matchacafe tokyocafe';
-                    queryHelp.textContent = 'Enter hashtags (without #)';
-                } else if (searchType === 'place') {
-                    queryInput.placeholder = 'e.g., Tokyo, Shibuya';
-                    queryHelp.textContent = 'Enter a location or place name';
-                }
-            });
-        }
-    });
-</script>
-
 <!-- Search Results -->
 {% if results %}
 <div class="row">
@@ -206,6 +242,59 @@
     </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Dynamic placeholder and help text based on search type
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchTypeSelect = document.getElementById('search-type-select');
+        const queryInput = document.getElementById('query-input');
+        const queryHelp = document.getElementById('query-help');
+        const searchForm = document.getElementById('searchForm');
+        const searchBtn = document.getElementById('searchBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const platformSelect = document.getElementById('platform-select');
+        const platformName = document.getElementById('platformName');
+        
+        // Dynamic placeholder
+        if (searchTypeSelect && queryInput) {
+            searchTypeSelect.addEventListener('change', function() {
+                const searchType = this.value;
+                
+                if (searchType === 'profile') {
+                    queryInput.placeholder = 'e.g., starbucks bluebottlecoffee';
+                    queryHelp.textContent = 'Enter usernames (without @), separated by spaces';
+                } else if (searchType === 'hashtag') {
+                    queryInput.placeholder = 'e.g., matchacafe tokyocafe';
+                    queryHelp.textContent = 'Enter hashtags (without #)';
+                } else if (searchType === 'place') {
+                    queryInput.placeholder = 'e.g., Tokyo, Shibuya';
+                    queryHelp.textContent = 'Enter a location or place name';
+                }
+            });
+        }
+        
+        // Loading overlay on search
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                // Only show loading for search button, not save button
+                if (e.submitter && e.submitter.name === 'search') {
+                    // Get platform name
+                    const platform = platformSelect ? platformSelect.options[platformSelect.selectedIndex].text : 'Social Media';
+                    platformName.textContent = platform;
+                    
+                    // Show loading overlay
+                    loadingOverlay.style.display = 'flex';
+                    
+                    // Disable search button
+                    searchBtn.disabled = true;
+                    searchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Searching...';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
 
 
